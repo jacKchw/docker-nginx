@@ -1,0 +1,49 @@
+version: "3"
+services:
+  nginx:
+    image: nginx
+    ports:
+      - "8081:80"
+    depends_on:
+      - server
+      - db
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+
+      
+  backend:
+    image: jackchan56220/clould-learning-ts
+    restart: always
+    links:
+      - db
+    depends_on:
+      - db
+    environment:
+      MYSQL_HOST: "db"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "password"
+      MYSQL_DATABASE: "test"
+      ROOT_USERID: "admin"
+      ROOT_USERNAME: "admin"
+      ROOT_PASSWORD: "abc"
+      SECRET: "abc"
+
+
+  db:
+    image: linuxserver/mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "password"
+      MYSQL_USER: "admin"
+      MYSQL_PASSWORD: "password"
+      MYSQL_DATABASE: "test"
+    healthcheck:
+      test: '/usr/bin/mysql --user=root --password=password --protocol tcp --execute "USE test;"'
+      interval: 2s
+      timeout: 20s
+      retries: 10
+    volumes:
+      - mariadb-data:/var/lib/mysql
+volumes:
+  mariadb-data:
+
